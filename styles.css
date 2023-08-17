@@ -1,0 +1,137 @@
+/* body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: Helvetica;
+}
+
+#tree {
+  width: 100%;
+  height: 100%;
+}
+#spinner:not([hidden]) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#spinner::after {
+  content: '';
+  width: 80px;
+  height: 80px;
+  border: 2px solid #f3f3f3;
+  border-top: 3px solid #f25a41;
+  border-radius: 100%;
+  will-change: transform;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+body {
+  margin: 0px;
+}
+.bft-search {
+  display: none;
+}
+div#tree > svg {
+  margin: 0 auto;
+  background-image: url(family-tree.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+div#tree > svg > g {
+  pointer-events: none;
+}
+
+@media screen and (max-width: 768px) {
+  div#tree > svg {
+    height: 100vh;
+  }
+
+  div#tree {
+    height: 100vh !important;
+  }
+} */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: Helvetica;
+}
+
+#tree {
+  width: 100%;
+  height: 100%;
+}
+
+button[data-edit-from-save] {
+  display: none;
+}
+button[data-edit-from-cancel] {
+  display: none;
+}
+button[data-edit-from-btn='submit'] {
+  display: none;
+}
+.bft-img-button {
+  background: none !important;
+}
+.submit-btn {
+  position: absolute;
+  bottom: 10px;
+  width: 80%;
+  height: 40px;
+  left: 50px;
+  padding: 9px 20px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  user-select: none;
+  background: #0090b6;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.submit-btn:hover {
+  background: #007a9c;
+}
+
+.loading-text {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: auto;
+}
+
+.submit-btn.loading .loading-text {
+  display: block;
+}
+
+.submit-btn.loading .default-text {
+  display: none;
+}
+
+text {
+  text-transform: capitalize;
+}
