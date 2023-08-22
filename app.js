@@ -26,9 +26,9 @@ var Freeze = true;
 let determineRelativeType = (data) => {
   console.log(data, 'determineRelativeType');
   if (data?.gender && !data?.mid && !data?.fid) return 'parent';
-  if (data?.pids) return 'spouse';
+  if (data?.pids && !data?.mid && !data.fid) return 'spouse';
   if (data?.mid && data.fid && data?.gender) return 'children';
-  return 'unknown';
+  return null;
 };
 
 const nodeMenuTreeStyle = document.createElement('style');
@@ -91,20 +91,10 @@ async function start() {
         mouseScrool: FamilyTree.none,
         nodeMouseClick: FamilyTree.action.details,
         mode: 'light',
+        zoom: 0.8,
         enableSearch: false,
         template: 'hugo',
         nodeTreeMenu: true,
-        // nodeMenu: {
-        //   edit: {
-        //     text: 'Add Relative',
-        //   },
-        //   details: {
-        //     text: 'Details',
-        //     onClick: (node, nodeId) => {
-        //       console.log('detail', nodeId, node);
-        //     },
-        //   },
-        // },
         nodeBinding: {
           field_0: 'name',
           field_1: 'gender',
@@ -150,105 +140,115 @@ async function start() {
       });
       chart.on('click', function (sender, args) {
         console.log(args.node.id, 'Clicked on Node');
+        args.preventDefault();
         sender.editUI.show(args.node.id, false);
         return false;
       });
-      chart.editUI.on('update', async function (sender, args) {
-        console.log(args, 'args in button-click');
-        if (args.name === 'submit') {
-          var data = chart.get(args.nodeId);
-          console.log(data, 'sasasas');
-          var relativeEmailInputValue = document.querySelector(
-            "input[data-binding='relative_email']"
-          )?.value;
-          const selectedSuposeId = document.querySelector(
-            "[data-binding='Spouse']"
-          )?.value;
-          console.log(selectedSuposeId, 'selectedSuposeId');
-          if (!relativeEmailInputValue)
-            return Toastify({
-              text: 'Please fill in this field',
-              duration: 3000,
-              position: 'center',
-              style: {
-                background: 'red',
-              },
-            }).showToast();
-          console.log(relativeEmailInputValue, 'Typed Relative Email');
-          const relativeType = determineRelativeType(data);
-          const payload = {
-            tree_id: treeId,
-            user_id: user_id,
-            relative_type: relativeType,
-            relative_email: relativeEmailInputValue,
-            api: 'abc.com',
-          };
-          if (data?.fid && data?.mid) {
-            payload['relative_type'] = 'children';
-            payload['spouse_id'] = selectedSuposeId;
-          }
-          console.log(payload, 'payload');
-          var submitButton = document.querySelector('.submit-btn');
-          submitButton.classList.add('loading');
-          try {
-            const response = await fetch(
-              'https://apinew.bridjus.com/tree/add-relative',
-              {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
+      let isButtonClickListenerAttached = false;
+      let currentNodeData = null;
+      chart.on('updated', async function (sender, args) {
+        if (args.addNodesData.length) {
+          console.log(args, 'args in updated');
+          currentNodeData = args.addNodesData[0];
+          console.log(currentNodeData, 'currentNodeData');
+          sender.editUI.show(currentNodeData.id);
+          chart.removeNode(currentNodeData.id);
+          console.log('Before submit block');
+          if (!isButtonClickListenerAttached) {
+            chart.editUI.on('button-click', async function (sender, args) {
+              console.log('after submit block');
+              if (args.name === 'submit') {
+                var relativeEmailInputValue = document.querySelector(
+                  "input[data-binding='relative_email']"
+                )?.value;
+                const selectedSuposeId = document.querySelector(
+                  "[data-binding='Spouse']"
+                )?.value;
+                console.log(selectedSuposeId, 'selectedSuposeId');
+                if (!relativeEmailInputValue)
+                  return Toastify({
+                    text: 'Please fill in this field',
+                    duration: 3000,
+                    position: 'center',
+                    style: {
+                      background: 'red',
+                    },
+                  }).showToast();
+                console.log(relativeEmailInputValue, 'Typed Relative Email');
+                const relativeType = determineRelativeType(currentNodeData);
+                console.log(relativeType, 'relativeType');
+                const payload = {
+                  tree_id: treeId,
+                  user_id: user_id,
+                  relative_type: relativeType,
+                  relative_email: relativeEmailInputValue,
+                  api: 'abc.com',
+                  ...(currentNodeData?.fid && currentNodeData?.mid
+                    ? {
+                        relative_type: 'children',
+                        spouse_id: selectedSuposeId || null,
+                      }
+                    : {}),
+                };
+                console.log('payload=>', payload);
+                var submitButton = document.querySelector('.submit-btn');
+                submitButton.classList.add('loading');
+                try {
+                  const response = await fetch(
+                    'https://apinew.bridjus.com/tree/add-relative',
+                    {
+                      method: 'POST',
+                      body: JSON.stringify(payload),
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    }
+                  );
 
-            if (response.ok) {
-              const result = await response.json();
-              console.log(result.data, 'Added relative successfully');
-              Toastify({
-                text: 'Relative added successfully',
-                duration: 3000,
-                position: 'center',
-                style: {
-                  background: 'linear-gradient(to right, #00b09b, #96c93d)',
-                },
-              }).showToast();
-              chart.removeNode(args.nodeId);
-              console.time('child remove node');
-            } else {
-              console.error('Error while adding relative:', error);
-              Toastify({
-                text: 'Error while adding relative',
-                duration: 3000,
-                position: 'center',
-                style: {
-                  background: 'red',
-                },
-              }).showToast();
-            }
-          } catch (error) {
-            console.error('Error while adding relative:', error);
-            Toastify({
-              text: 'Error while adding relative',
-              duration: 3000,
-              position: 'center',
-              style: {
-                background: 'red',
-              },
-            }).showToast();
-          } finally {
-            console.log('finally');
-            submitButton.classList.remove('loading');
+                  if (response.ok) {
+                    const result = await response.json();
+                    console.log(result.data, 'Added relative successfully');
+                    Toastify({
+                      text: 'Relative Added Successfully',
+                      duration: 3000,
+                      position: 'center',
+                      style: {
+                        background:
+                          'linear-gradient(to right, #00b09b, #96c93d)',
+                      },
+                    }).showToast();
+                    chart.removeNode(args.nodeId);
+                  } else {
+                    console.error('Error while adding relative:', error);
+                    Toastify({
+                      text: 'Error while adding relative',
+                      duration: 3000,
+                      position: 'center',
+                      style: {
+                        background: 'red',
+                      },
+                    }).showToast();
+                  }
+                } catch (error) {
+                  console.error('Error while adding relative:', error);
+                  Toastify({
+                    text: 'Error while adding relative',
+                    duration: 3000,
+                    position: 'center',
+                    style: {
+                      background: 'red',
+                    },
+                  }).showToast();
+                } finally {
+                  console.log('finally');
+                  submitButton.classList.remove('loading');
+                }
+              }
+            });
+            isButtonClickListenerAttached = true;
           }
         }
       });
-      // chart.on('updated', function (sender, args) {
-      //   console.log(args, 'args in updated');
-      //   if (args.addNodesData.length) {
-      //     sender.editUI.show(args.addNodesData[0].id);
-      //     chart.removeNode(args.addNodesData[0].id);
-      //   }
-      // });
       for (i = 0; i < result.data.final_filter.length; i++) {
         apiRetrievedData.push({
           id: result.data.final_filter[i]?.id,
@@ -257,7 +257,8 @@ async function start() {
           name: result.data.final_filter[i].name,
           fid: result.data.final_filter[i].fid,
           img: result.data.final_filter[i].photo,
-          gender: result.data.final_filter[i].gender.toLowerCase(),
+          // gender: result.data.final_filter[i].gender.toLowerCase(),
+          gender: result.data.final_filter[i].gender,
         });
       }
       for (j = 0; j < apiRetrievedData.length; j++) {

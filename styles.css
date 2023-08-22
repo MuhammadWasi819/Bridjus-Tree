@@ -74,7 +74,7 @@ body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  font-family: Helvetica;
+  font-family: Helvetica, sans-serif;
 }
 
 #tree {
@@ -134,4 +134,42 @@ button[data-edit-from-btn='submit'] {
 
 text {
   text-transform: capitalize;
+}
+
+.bft-edit-form-instruments {
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+.bft-edit-form-avatar {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  position: relative !important;
+}
+
+.bft-edit-form-avatar svg {
+  display: none !important;
+}
+
+.bft-edit-form-avatar::after {
+  position: absolute !important;
+  content: 'Add Relative' !important;
+  color: #0090b6 !important;
+  font-size: 30px !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  position: absolute !important;
+  top: -10% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+.bft-form-fieldset {
+  position: absolute !important;
+  top: 100px !important;
+}
+.bft-edit-form-close path {
+  fill: #0090b6 !important;
+}
+.bft-edit-form-header {
+  background: transparent !important;
 }
