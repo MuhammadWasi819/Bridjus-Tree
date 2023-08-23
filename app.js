@@ -25,7 +25,7 @@ var Freeze = true;
 
 let determineRelativeType = (data) => {
   console.log(data, 'determineRelativeType');
-  if (data?.gender && !data?.mid && !data?.fid) return 'parent';
+  if (data?.gender && !data?.mid && !data?.fid && !data.pids) return 'parent';
   if (data?.pids && !data?.mid && !data.fid) return 'spouse';
   if (data?.mid && data.fid && data?.gender) return 'children';
   return null;
@@ -88,7 +88,9 @@ async function start() {
       }
       console.log(options, 'options');
       var chart = new FamilyTree(document.getElementById('tree'), {
-        mouseScrool: FamilyTree.none,
+        showXScroll: FamilyTree.scroll.visible,
+        showYScroll: FamilyTree.scroll.visible,
+        mouseScrool: FamilyTree.action.zoom,
         nodeMouseClick: FamilyTree.action.details,
         mode: 'light',
         zoom: 0.8,
@@ -116,6 +118,10 @@ async function start() {
               text: 'submit',
               icon: submitIcon,
             },
+            close: {
+              icon: '<i class="fas fa-times"></i>',
+              text: '',
+            },
           },
           addMore: '',
           addMoreBtn: '',
@@ -141,8 +147,8 @@ async function start() {
       chart.on('click', function (sender, args) {
         console.log(args.node.id, 'Clicked on Node');
         args.preventDefault();
-        sender.editUI.show(args.node.id, false);
-        return false;
+        // sender.editUI.show(args.node.id, false);
+        // return false;
       });
       let isButtonClickListenerAttached = false;
       let currentNodeData = null;
@@ -153,11 +159,26 @@ async function start() {
           console.log(currentNodeData, 'currentNodeData');
           sender.editUI.show(currentNodeData.id);
           chart.removeNode(currentNodeData.id);
+
+          const spouseSelect = document.querySelector(
+            "[data-binding='Spouse']"
+          );
+          const spouseLabel = spouseSelect
+            ? spouseSelect.previousElementSibling
+            : null;
+          if (currentNodeData && currentNodeData.fid && currentNodeData.mid) {
+            if (spouseSelect) spouseSelect.style.display = 'block';
+            if (spouseLabel) spouseLabel.style.display = 'block';
+          } else {
+            if (spouseSelect) spouseSelect.style.display = 'none';
+            if (spouseLabel) spouseLabel.style.display = 'none';
+          }
           console.log('Before submit block');
           if (!isButtonClickListenerAttached) {
             chart.editUI.on('button-click', async function (sender, args) {
               console.log('after submit block');
               if (args.name === 'submit') {
+                chart.removeNode(args.nodeId);
                 var relativeEmailInputValue = document.querySelector(
                   "input[data-binding='relative_email']"
                 )?.value;
@@ -171,7 +192,7 @@ async function start() {
                     duration: 3000,
                     position: 'center',
                     style: {
-                      background: 'red',
+                      background: 'linear-gradient(180deg, #dd464c, #8d2729)',
                     },
                   }).showToast();
                 console.log(relativeEmailInputValue, 'Typed Relative Email');
@@ -217,7 +238,6 @@ async function start() {
                           'linear-gradient(to right, #00b09b, #96c93d)',
                       },
                     }).showToast();
-                    chart.removeNode(args.nodeId);
                   } else {
                     console.error('Error while adding relative:', error);
                     Toastify({
@@ -225,7 +245,7 @@ async function start() {
                       duration: 3000,
                       position: 'center',
                       style: {
-                        background: 'red',
+                        background: 'linear-gradient(180deg, #dd464c, #8d2729)',
                       },
                     }).showToast();
                   }
@@ -257,8 +277,8 @@ async function start() {
           name: result.data.final_filter[i].name,
           fid: result.data.final_filter[i].fid,
           img: result.data.final_filter[i].photo,
-          // gender: result.data.final_filter[i].gender.toLowerCase(),
-          gender: result.data.final_filter[i].gender,
+          gender: result.data.final_filter[i].gender.toLowerCase(),
+          // gender: result.data.final_filter[i].gender,
         });
       }
       for (j = 0; j < apiRetrievedData.length; j++) {
