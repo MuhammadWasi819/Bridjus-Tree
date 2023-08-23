@@ -25,8 +25,9 @@ var Freeze = true;
 
 let determineRelativeType = (data) => {
   console.log(data, 'determineRelativeType');
+  if (data?.pids && !data.fid && !data.mid) return 'spouse';
   if (data?.gender && !data?.mid && !data?.fid && !data.pids) return 'parent';
-  if (data?.pids && !data?.mid && !data.fid) return 'spouse';
+  if (data.gender && data.pids) return 'parent';
   if (data?.mid && data.fid && data?.gender) return 'children';
   return null;
 };
