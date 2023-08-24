@@ -25,11 +25,10 @@ var Freeze = true;
 
 let determineRelativeType = (data) => {
   console.log(data, 'determineRelativeType');
-  if (data?.pids && !data.fid && !data.mid) return 'spouse';
-  if (data?.gender && !data?.mid && !data?.fid && !data.pids) return 'parent';
-  if (data.gender && data.pids) return 'parent';
-  if (data?.mid && data.fid && data?.gender) return 'children';
-  return null;
+  if (data.children && data.children.length > 0 && !data.parent)
+    return 'parent';
+  if (data.tags.includes('partner')) return 'spouse';
+  if (data.parent) return 'children';
 };
 
 const nodeMenuTreeStyle = document.createElement('style');
@@ -39,7 +38,7 @@ nodeMenuTreeStyle.innerHTML = `
     }
 
     use[data-ctrl-n-t-menu-id="${user_id}"] {
-        display: inline; 
+        display: inline;
     }
 `;
 document.head.appendChild(nodeMenuTreeStyle);
@@ -89,9 +88,7 @@ async function start() {
       }
       console.log(options, 'options');
       var chart = new FamilyTree(document.getElementById('tree'), {
-        showXScroll: FamilyTree.scroll.visible,
-        showYScroll: FamilyTree.scroll.visible,
-        mouseScrool: FamilyTree.action.zoom,
+        mouseScrool: FamilyTree.none,
         nodeMouseClick: FamilyTree.action.details,
         mode: 'light',
         zoom: 0.8,
@@ -145,128 +142,117 @@ async function start() {
           ],
         },
       });
+      let lastClickedNodeData = null;
+      let chartData = null;
       chart.on('click', function (sender, args) {
-        console.log(args.node.id, 'Clicked on Node');
-        args.preventDefault();
-        // sender.editUI.show(args.node.id, false);
-        // return false;
+        // args.preventDefault();
+        lastClickedNodeData = args.node;
+        chartData = chart.get(args.node.id);
+        // console.log(chartData, 'chartData');
+        // console.log('Clicked on Node=>', lastClickedNodeData);
+        sender.editUI.show(args.node.id, false);
+        const spouseSelect = document.querySelector("[data-binding='Spouse']");
+        const spouseLabel = spouseSelect
+          ? spouseSelect.previousElementSibling
+          : null;
+        if (chartData && chartData.fid && chartData.mid && options.length > 0) {
+          if (spouseSelect) spouseSelect.style.display = 'block';
+          if (spouseLabel) spouseLabel.style.display = 'block';
+        } else {
+          if (spouseSelect) spouseSelect.style.display = 'none';
+          if (spouseLabel) spouseLabel.style.display = 'none';
+        }
+        return false;
       });
-      let isButtonClickListenerAttached = false;
-      let currentNodeData = null;
-      chart.on('updated', async function (sender, args) {
-        if (args.addNodesData.length) {
-          console.log(args, 'args in updated');
-          currentNodeData = args.addNodesData[0];
-          console.log(currentNodeData, 'currentNodeData');
-          sender.editUI.show(currentNodeData.id);
-          chart.removeNode(currentNodeData.id);
+      chart.editUI.on('button-click', async function (sender, args) {
+        chart.removeNode(args.id);
+        if (args.name === 'submit') {
+          var data = chart.get(args.nodeId);
+          // console.log(data, 'data in submit');
 
-          const spouseSelect = document.querySelector(
+          console.log('data=>', data);
+          var relativeEmailInputValue = document.querySelector(
+            "input[data-binding='relative_email']"
+          )?.value;
+          const selectedSuposeId = document.querySelector(
             "[data-binding='Spouse']"
-          );
-          const spouseLabel = spouseSelect
-            ? spouseSelect.previousElementSibling
-            : null;
-          if (currentNodeData && currentNodeData.fid && currentNodeData.mid) {
-            if (spouseSelect) spouseSelect.style.display = 'block';
-            if (spouseLabel) spouseLabel.style.display = 'block';
-          } else {
-            if (spouseSelect) spouseSelect.style.display = 'none';
-            if (spouseLabel) spouseLabel.style.display = 'none';
+          )?.value;
+          console.log(selectedSuposeId, 'selectedSuposeId');
+          if (!relativeEmailInputValue)
+            return Toastify({
+              text: 'Please fill in this field',
+              duration: 3000,
+              position: 'center',
+              style: {
+                background: 'linear-gradient(180deg, #dd464c, #8d2729)',
+              },
+            }).showToast();
+          console.log(relativeEmailInputValue, 'Typed Relative Email');
+          const relativeType = determineRelativeType(lastClickedNodeData);
+          console.log('relativeType', relativeType);
+          const payload = {
+            tree_id: treeId,
+            user_id: user_id,
+            relative_type: relativeType,
+            relative_email: relativeEmailInputValue,
+            api: 'abc.com',
+          };
+          if (data.fid && data.mid) {
+            payload['relative_type'] = 'children';
+            payload['spouse_id'] = selectedSuposeId || null;
           }
-          console.log('Before submit block');
-          if (!isButtonClickListenerAttached) {
-            chart.editUI.on('button-click', async function (sender, args) {
-              console.log('after submit block');
-              if (args.name === 'submit') {
-                chart.removeNode(args.nodeId);
-                var relativeEmailInputValue = document.querySelector(
-                  "input[data-binding='relative_email']"
-                )?.value;
-                const selectedSuposeId = document.querySelector(
-                  "[data-binding='Spouse']"
-                )?.value;
-                console.log(selectedSuposeId, 'selectedSuposeId');
-                if (!relativeEmailInputValue)
-                  return Toastify({
-                    text: 'Please fill in this field',
-                    duration: 3000,
-                    position: 'center',
-                    style: {
-                      background: 'linear-gradient(180deg, #dd464c, #8d2729)',
-                    },
-                  }).showToast();
-                console.log(relativeEmailInputValue, 'Typed Relative Email');
-                const relativeType = determineRelativeType(currentNodeData);
-                console.log(relativeType, 'relativeType');
-                const payload = {
-                  tree_id: treeId,
-                  user_id: user_id,
-                  relative_type: relativeType,
-                  relative_email: relativeEmailInputValue,
-                  api: 'abc.com',
-                  ...(currentNodeData?.fid && currentNodeData?.mid
-                    ? {
-                        relative_type: 'children',
-                        spouse_id: selectedSuposeId || null,
-                      }
-                    : {}),
-                };
-                console.log('payload=>', payload);
-                var submitButton = document.querySelector('.submit-btn');
-                submitButton.classList.add('loading');
-                try {
-                  const response = await fetch(
-                    'https://apinew.bridjus.com/tree/add-relative',
-                    {
-                      method: 'POST',
-                      body: JSON.stringify(payload),
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                    }
-                  );
-
-                  if (response.ok) {
-                    const result = await response.json();
-                    console.log(result.data, 'Added relative successfully');
-                    Toastify({
-                      text: 'Relative Added Successfully',
-                      duration: 3000,
-                      position: 'center',
-                      style: {
-                        background:
-                          'linear-gradient(to right, #00b09b, #96c93d)',
-                      },
-                    }).showToast();
-                  } else {
-                    console.error('Error while adding relative:', error);
-                    Toastify({
-                      text: 'Error while adding relative',
-                      duration: 3000,
-                      position: 'center',
-                      style: {
-                        background: 'linear-gradient(180deg, #dd464c, #8d2729)',
-                      },
-                    }).showToast();
-                  }
-                } catch (error) {
-                  console.error('Error while adding relative:', error);
-                  Toastify({
-                    text: 'Error while adding relative',
-                    duration: 3000,
-                    position: 'center',
-                    style: {
-                      background: 'red',
-                    },
-                  }).showToast();
-                } finally {
-                  console.log('finally');
-                  submitButton.classList.remove('loading');
-                }
+          console.log('payload=>', payload);
+          var submitButton = document.querySelector('.submit-btn');
+          submitButton.classList.add('loading');
+          try {
+            const response = await fetch(
+              'https://apinew.bridjus.com/tree/add-relative',
+              // 'http://jsonplaceholder.typicode.com/posts',
+              {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               }
-            });
-            isButtonClickListenerAttached = true;
+            );
+
+            if (response.ok) {
+              const result = await response.json();
+              console.log(result.data, 'Added relative successfully');
+              Toastify({
+                text: 'Relative Added Successfully',
+                duration: 3000,
+                position: 'center',
+                style: {
+                  background: '#4BB543',
+                },
+              }).showToast();
+              chart.removeNode(args.nodeId);
+            } else {
+              console.error('Error while adding relative:', error);
+              Toastify({
+                text: 'Error while adding relative',
+                duration: 3000,
+                position: 'center',
+                style: {
+                  background: 'linear-gradient(180deg, #dd464c, #8d2729)',
+                },
+              }).showToast();
+            }
+          } catch (error) {
+            console.error('Error while adding relative:', error);
+            Toastify({
+              text: 'Error while adding relative',
+              duration: 3000,
+              position: 'center',
+              style: {
+                background: 'red',
+              },
+            }).showToast();
+          } finally {
+            console.log('finally');
+            submitButton.classList.remove('loading');
           }
         }
       });
@@ -283,7 +269,7 @@ async function start() {
         });
       }
       for (j = 0; j < apiRetrievedData.length; j++) {
-        console.log(apiRetrievedData[j], 'apiRetrievedData[j]');
+        // console.log(apiRetrievedData[j], 'apiRetrievedData[j]');
       }
       chart.load(apiRetrievedData);
       spinner.setAttribute('hidden', '');
