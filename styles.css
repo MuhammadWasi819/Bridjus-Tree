@@ -93,6 +93,8 @@ button[data-edit-from-btn='submit'] {
 }
 .bft-img-button {
   background: none !important;
+  width: 0 !important;
+  height: 0 !important  ;
 }
 .submit-btn {
   position: absolute;
@@ -131,7 +133,11 @@ button[data-edit-from-btn='submit'] {
 .submit-btn.loading .default-text {
   display: none;
 }
-
+.submit-btn:disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
 text {
   text-transform: capitalize;
 }
@@ -159,13 +165,13 @@ text {
   font-weight: bold !important;
   white-space: nowrap !important;
   position: absolute !important;
-  top: -10% !important;
+  top: -69% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
 }
 .bft-form-fieldset {
   position: absolute !important;
-  top: 100px !important;
+  top: 50px !important;
 }
 .bft-edit-form-close {
   left: 10px !important;
@@ -197,4 +203,7 @@ text {
 }
 .bft-input > label {
   color: #8d2729 !important;
+}
+option[value=''] {
+  display: none;
 }
