@@ -77,36 +77,33 @@ async function start() {
       const result = await response.json();
       // console.log(result.data.final_filter, 'response.data');
       const filteredData = result.data.final_filter.filter((item) => item.pids);
-      // console.log(filteredData, 'filteredData');
+      console.log(filteredData, 'filteredData');
       const currentUser = filteredData.find((person) => person.id === user_id);
-      // console.log(currentUser, 'currentUser');
       let options = [];
 
       if (currentUser) {
-        const spouse = filteredData.find(
-          (item) => item.pids && item.pids.includes(currentUser.id)
-        );
-        // console.log(spouse, 'spouse.currentUser');
-        if (spouse) {
-          // console.log(spouse, "spouse['id']");
+        console.log('currentUser=>', currentUser.pids);
+        const spouses = filteredData.filter((item) => {
+          return item.pids && item.pids.includes(currentUser.id);
+        });
+
+        console.log(spouses, 'spouses');
+        spouses.forEach((spouse) => {
           options.push({
             value: spouse.id,
             text: spouse.name,
           });
-        }
+        });
       }
-      // console.log(options, 'options');
+      console.log(options, 'options');
       var chart = new FamilyTree(document.getElementById('tree'), {
         mouseScrool: FamilyTree.action.zoom,
         lazyLoading: true,
-        // showXScroll: FamilyTree.scroll.visible,
-        // showYScroll: FamilyTree.scroll.visible,
         nodeMouseClick: FamilyTree.action.edit,
         scaleInitial: 0.8,
         mode: 'light',
         enableSearch: false,
         template: 'hugo',
-        // nodeTreeMenu: true,
         nodeMenu: {
           edit: {
             icon: `<i class="fas fa-share"></i>`,
