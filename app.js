@@ -49,7 +49,6 @@ nodeMenuStyle.innerHTML = `
 document.head.appendChild(nodeMenuStyle);
 
 document.addEventListener('click', () => {
-  console.log('Screen clicked');
   const spouseSelect = document.querySelector("[data-binding='Spouse']");
   const relativeType = document.querySelector("[data-binding='Relative Type']");
   const spouseLabel = spouseSelect ? spouseSelect.previousElementSibling : null;
@@ -99,8 +98,16 @@ async function start() {
       var chart = new FamilyTree(document.getElementById('tree'), {
         mouseScrool: FamilyTree.action.zoom,
         lazyLoading: true,
+        // enableTouch: true,
         nodeMouseClick: FamilyTree.action.edit,
-        scaleInitial: 0.8,
+        scaleInitial: 0.4,
+        // toolbar: {
+        //   layout: true,
+        //   zoom: true,
+        //   fit: true,
+        //   expandAll: false,
+        //   fullScreen: true,
+        // },
         mode: 'light',
         enableSearch: false,
         template: 'hugo',
@@ -236,7 +243,7 @@ async function start() {
                 user_id: user_id,
                 relative_type: relativeType,
                 relative_email: relativeEmailInputValue.toLowerCase(),
-                api: 'abc.com',
+                api: 'https://bridjus.page.link?amv=0&apn=com.bridjus.thesuitch&ibi=com.app.bridjus&imv=0&isi=1669724719&link=https%3A%2F%2Fbridjus.page.link',
               };
               if (relativeType === 'children') {
                 payload['spouse_id'] = selectedSuposeId || null;
