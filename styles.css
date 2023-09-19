@@ -88,7 +88,7 @@ button[data-edit-from-save] {
 button[data-edit-from-cancel] {
   display: none;
 }
-button[data-edit-from-btn='submit'] {
+button[data-edit-from-btn="submit"] {
   display: none;
 }
 .bft-img-button {
@@ -159,7 +159,7 @@ text {
 
 .bft-edit-form-avatar::after {
   position: absolute !important;
-  content: 'Add Relative' !important;
+  content: "Add Relative" !important;
   color: #8d2729 !important;
   font-size: 30px !important;
   font-weight: bold !important;
@@ -204,6 +204,13 @@ text {
 .bft-input > label {
   color: #8d2729 !important;
 }
-option[value=''] {
+option[value=""] {
   display: none;
+}
+
+.bft-input > label {
+  font-size: 10px !important;
+  font-weight: bold;
+  /* text-transform: uppercase; */
+  /* letter-spacing: 1px; */
 }
