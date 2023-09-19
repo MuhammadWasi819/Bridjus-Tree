@@ -98,9 +98,9 @@ button[data-edit-from-btn="submit"] {
 }
 .submit-btn {
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
   width: 80%;
-  height: 40px;
+  height: 30px;
   left: 50px;
   padding: 9px 20px;
   border-radius: 5px;
@@ -171,7 +171,7 @@ text {
 }
 .bft-form-fieldset {
   position: absolute !important;
-  top: 50px !important;
+  top: 30px !important;
 }
 .bft-edit-form-close {
   left: 10px !important;
@@ -200,6 +200,7 @@ text {
   background: #fff !important;
   border: 1px solid #8d2729 !important;
   color: #8d2729 !important;
+  padding: 10px !important;
 }
 .bft-input > label {
   color: #8d2729 !important;
@@ -207,10 +208,6 @@ text {
 option[value=""] {
   display: none;
 }
-
 .bft-input > label {
-  font-size: 10px !important;
-  font-weight: bold;
-  /* text-transform: uppercase; */
-  /* letter-spacing: 1px; */
+  font-size: 12px !important;
 }

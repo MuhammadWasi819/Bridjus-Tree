@@ -8,23 +8,23 @@ let submitIcon = `
 function getURLParameter(e) {
   return (
     decodeURIComponent(
-      (new RegExp('[?|&]' + e + '=([^&;]+?)(&|#|;|$)').exec(
+      (new RegExp("[?|&]" + e + "=([^&;]+?)(&|#|;|$)").exec(
         location.search
-      ) || [null, ''])[1].replace(/\+/g, '%20')
+      ) || [null, ""])[1].replace(/\+/g, "%20")
     ) || null
   );
 }
-const spinner = document.getElementById('spinner');
+const spinner = document.getElementById("spinner");
 let isAddingNewNode = false;
 
-var treeId = getURLParameter('treeId');
-var user_id = getURLParameter('user_id');
+var treeId = getURLParameter("treeId");
+var user_id = getURLParameter("user_id");
 var apiRetrievedData = [];
 var aData = [];
 var Freeze = true;
 
 // add nodes icon
-const nodeMenuTreeStyle = document.createElement('style');
+const nodeMenuTreeStyle = document.createElement("style");
 nodeMenuTreeStyle.innerHTML = `
     use[data-ctrl-n-t-menu-id] {
         display: none;
@@ -37,7 +37,7 @@ nodeMenuTreeStyle.innerHTML = `
 document.head.appendChild(nodeMenuTreeStyle);
 
 // add relative icon
-const nodeMenuStyle = document.createElement('style');
+const nodeMenuStyle = document.createElement("style");
 nodeMenuStyle.innerHTML = `
     use[data-ctrl-n-menu-id] {
         display: none;
@@ -48,27 +48,63 @@ nodeMenuStyle.innerHTML = `
 `;
 document.head.appendChild(nodeMenuStyle);
 
-document.addEventListener('click', () => {
+// document.addEventListener("click", () => {
+//   const spouseSelect = document.querySelector("[data-binding='Spouse']");
+//   const relativeType = document.querySelector("[data-binding='Relative Type']");
+//   const spouseLabel = spouseSelect ? spouseSelect.previousElementSibling : null;
+
+//   if (relativeType && relativeType.value === "children") {
+//     if (spouseSelect) spouseSelect.style.display = "block";
+//     if (spouseLabel) spouseLabel.style.display = "block";
+//   } else {
+//     if (spouseSelect) spouseSelect.style.display = "none";
+//     if (spouseLabel) spouseLabel.style.display = "none";
+//   }
+// });
+
+document.addEventListener("click", () => {
   const spouseSelect = document.querySelector("[data-binding='Spouse']");
   const relativeType = document.querySelector("[data-binding='Relative Type']");
   const spouseLabel = spouseSelect ? spouseSelect.previousElementSibling : null;
+  const relativeLabel = relativeType
+    ? relativeType.previousElementSibling
+    : null;
 
-  if (relativeType && relativeType.value === 'children') {
-    if (spouseSelect) spouseSelect.style.display = 'block';
-    if (spouseLabel) spouseLabel.style.display = 'block';
+  if (relativeType && relativeType.value === "children") {
+    if (spouseSelect) spouseSelect.style.display = "block";
+    if (spouseLabel) spouseLabel.style.display = "block";
   } else {
-    if (spouseSelect) spouseSelect.style.display = 'none';
-    if (spouseLabel) spouseLabel.style.display = 'none';
+    if (spouseSelect) spouseSelect.style.display = "none";
+    if (spouseLabel) spouseLabel.style.display = "none";
+  }
+
+  if (relativeLabel && relativeType.value) {
+    relativeLabel.style.display = "none";
+  } else if (relativeLabel) {
+    relativeLabel.style.display = "block";
+  }
+
+  const emailInput = document.querySelector("[data-binding='relative_email']");
+  const emailLabel = emailInput ? emailInput.previousElementSibling : null;
+
+  if (emailInput && emailLabel) {
+    emailInput.addEventListener("input", () => {
+      if (emailInput.value) {
+        emailLabel.style.display = "none";
+      } else {
+        emailLabel.style.display = "block";
+      }
+    });
   }
 });
 
 async function start() {
-  spinner.removeAttribute('hidden');
+  spinner.removeAttribute("hidden");
   try {
     const response = await fetch(
-      'https://apinew.bridjus.com/tree/get-tree?tree_id=' + treeId,
+      "https://apinew.bridjus.com/tree/get-tree?tree_id=" + treeId,
       {
-        method: 'GET',
+        method: "GET",
       }
     );
 
@@ -76,17 +112,17 @@ async function start() {
       const result = await response.json();
       // console.log(result.data.final_filter, 'response.data');
       const filteredData = result.data.final_filter.filter((item) => item.pids);
-      console.log(filteredData, 'filteredData');
+      console.log(filteredData, "filteredData");
       const currentUser = filteredData.find((person) => person.id === user_id);
       let options = [];
 
       if (currentUser) {
-        console.log('currentUser=>', currentUser.pids);
+        console.log("currentUser=>", currentUser.pids);
         const spouses = filteredData.filter((item) => {
           return item.pids && item.pids.includes(currentUser.id);
         });
 
-        console.log(spouses, 'spouses');
+        console.log(spouses, "spouses");
         spouses.forEach((spouse) => {
           options.push({
             value: spouse.id,
@@ -94,8 +130,8 @@ async function start() {
           });
         });
       }
-      console.log(options, 'options');
-      var chart = new FamilyTree(document.getElementById('tree'), {
+      console.log(options, "options");
+      var chart = new FamilyTree(document.getElementById("tree"), {
         mouseScrool: FamilyTree.action.zoom,
         lazyLoading: true,
         // enableTouch: true,
@@ -108,26 +144,26 @@ async function start() {
         //   expandAll: false,
         //   fullScreen: true,
         // },
-        mode: 'light',
+        mode: "light",
         enableSearch: false,
-        template: 'hugo',
+        template: "hugo",
         nodeMenu: {
           edit: {
             icon: `<i class="fas fa-share"></i>`,
-            text: 'Add Relative',
+            text: "Add Relative",
           },
         },
         nodeBinding: {
-          field_0: 'name',
-          field_1: 'gender',
-          img_0: 'img',
+          field_0: "name",
+          field_1: "gender",
+          img_0: "img",
         },
         editForm: {
-          titleBinding: 'name',
-          photoBinding: 'photo',
-          addMoreBtn: 'Add element',
-          addMore: 'Add more elements',
-          addMoreFieldName: 'Element name',
+          titleBinding: "name",
+          photoBinding: "photo",
+          addMoreBtn: "Add element",
+          addMore: "Add more elements",
+          addMoreFieldName: "Element name",
           generateElementsFromFields: false,
           addMore: false,
           buttons: {
@@ -135,75 +171,75 @@ async function start() {
             share: null,
             remove: null,
             submit: {
-              text: 'submit',
+              text: "submit",
               icon: submitIcon,
             },
             close: {
               icon: '<i class="fas fa-times"></i>',
-              text: '',
+              text: "",
             },
           },
-          addMore: '',
-          addMoreBtn: '',
-          addMoreFieldName: '',
-          cancelBtn: '',
-          saveAndCloseBtn: '',
+          addMore: "",
+          addMoreBtn: "",
+          addMoreFieldName: "",
+          cancelBtn: "",
+          saveAndCloseBtn: "",
           elements: [
             {
-              type: 'select',
-              label: 'Choose Relative Type',
-              binding: 'Relative Type',
+              type: "select",
+              label: "Choose Relative Type",
+              binding: "Relative Type",
               options: [
                 {
-                  value: '',
-                  text: '',
+                  value: "",
+                  text: "",
                 },
                 {
-                  value: 'parent',
-                  text: 'Parent',
+                  value: "parent",
+                  text: "Parent",
                 },
                 {
-                  value: 'children',
-                  text: 'Children',
+                  value: "children",
+                  text: "Children",
                 },
                 {
-                  value: 'spouse',
-                  text: 'Spouse',
+                  value: "spouse",
+                  text: "Spouse",
                 },
               ],
             },
             {
-              type: 'select',
+              type: "select",
               options: options,
-              label: 'Select spouse',
-              binding: 'Spouse',
+              label: "Select spouse",
+              binding: "Spouse",
             },
 
             {
-              type: 'textbox',
-              label: 'Relative Email',
-              binding: 'relative_email',
-              vlidators: { required: 'Is required', email: 'Invalid email' },
+              type: "textbox",
+              label: "Relative Email",
+              binding: "relative_email",
+              vlidators: { required: "Is required", email: "Invalid email" },
             },
           ],
         },
       });
 
-      chart.on('click', function (sender, args) {
+      chart.on("click", function (sender, args) {
         args.preventDefault();
       });
 
       let isEditUIButtonClickEventAdded = false;
-      chart.nodeMenuUI.on('show', async function (sender, args) {
-        console.log(args, 'nodeMenuUI triggered');
+      chart.nodeMenuUI.on("show", async function (sender, args) {
+        console.log(args, "nodeMenuUI triggered");
 
         if (!isEditUIButtonClickEventAdded) {
           isEditUIButtonClickEventAdded = true;
-          chart.editUI.on('button-click', async function (sender, args) {
-            console.log(args, 'args in editUI');
+          chart.editUI.on("button-click", async function (sender, args) {
+            console.log(args, "args in editUI");
             chart.removeNode(args.id);
 
-            if (args.name === 'submit') {
+            if (args.name === "submit") {
               var relativeEmailInputValue = document.querySelector(
                 "input[data-binding='relative_email']"
               )?.value;
@@ -214,27 +250,27 @@ async function start() {
                 "[data-binding='Relative Type']"
               )?.value;
 
-              console.log(selectedSuposeId, 'selectedSuposeId');
-              console.log(relativeType, 'relativeType');
-              console.log(relativeEmailInputValue, 'Typed Relative Email');
+              console.log(selectedSuposeId, "selectedSuposeId");
+              console.log(relativeType, "relativeType");
+              console.log(relativeEmailInputValue, "Typed Relative Email");
 
               if (!relativeEmailInputValue) {
                 return Toastify({
-                  text: 'Please fill relative email field',
+                  text: "Please fill relative email field",
                   duration: 3000,
-                  position: 'center',
+                  position: "center",
                   style: {
-                    background: 'linear-gradient(180deg, #dd464c, #8d2729)',
+                    background: "linear-gradient(180deg, #dd464c, #8d2729)",
                   },
                 }).showToast();
               }
               if (!relativeType) {
                 return Toastify({
-                  text: 'Please select relative type',
+                  text: "Please select relative type",
                   duration: 3000,
-                  position: 'center',
+                  position: "center",
                   style: {
-                    background: 'linear-gradient(180deg, #dd464c, #8d2729)',
+                    background: "linear-gradient(180deg, #dd464c, #8d2729)",
                   },
                 }).showToast();
               }
@@ -243,80 +279,80 @@ async function start() {
                 user_id: user_id,
                 relative_type: relativeType,
                 relative_email: relativeEmailInputValue.toLowerCase(),
-                api: 'https://bridjus.page.link?amv=0&apn=com.bridjus.thesuitch&ibi=com.app.bridjus&imv=0&isi=1669724719&link=https%3A%2F%2Fbridjus.page.link',
+                api: "https://bridjus.page.link?amv=0&apn=com.bridjus.thesuitch&ibi=com.app.bridjus&imv=0&isi=1669724719&link=https%3A%2F%2Fbridjus.page.link",
               };
-              if (relativeType === 'children') {
-                payload['spouse_id'] = selectedSuposeId || null;
+              if (relativeType === "children") {
+                payload["spouse_id"] = selectedSuposeId || null;
               }
-              console.log('payload=>', payload);
-              var submitButton = document.querySelector('.submit-btn');
-              console.log(submitButton, 'submitButton');
-              submitButton.setAttribute('disabled', 'disabled');
-              submitButton.classList.add('loading');
+              console.log("payload=>", payload);
+              var submitButton = document.querySelector(".submit-btn");
+              console.log(submitButton, "submitButton");
+              submitButton.setAttribute("disabled", "disabled");
+              submitButton.classList.add("loading");
               try {
                 const response = await fetch(
-                  'https://apinew.bridjus.com/tree/add-relative',
+                  "https://apinew.bridjus.com/tree/add-relative",
                   {
-                    method: 'POST',
+                    method: "POST",
                     body: JSON.stringify(payload),
                     headers: {
-                      'Content-Type': 'application/json',
+                      "Content-Type": "application/json",
                     },
                   }
                 );
                 if (response.ok) {
                   const result = await response.json();
-                  console.log(result.data, 'Added relative successfully');
+                  console.log(result.data, "Added relative successfully");
                   Toastify({
-                    text: 'Relative Added Successfully',
+                    text: "Relative Added Successfully",
                     duration: 3000,
-                    position: 'center',
+                    position: "center",
                     style: {
-                      background: '#4BB543',
+                      background: "#4BB543",
                     },
                   }).showToast();
-                  var formElement = document.querySelector('.bft-edit-form');
+                  var formElement = document.querySelector(".bft-edit-form");
                   if (formElement) {
-                    formElement.style.display = 'none';
+                    formElement.style.display = "none";
                   }
                   return;
                   // chart.removeNode(args.nodeId);
                 }
                 if (response.status === 400) {
                   return Toastify({
-                    text: 'Relative Already Exists',
+                    text: "Relative Already Exists",
                     duration: 3000,
-                    position: 'center',
+                    position: "center",
                     style: {
-                      background: 'red',
+                      background: "red",
                     },
                   }).showToast();
                 } else {
-                  console.error('Error while adding relative:', error);
+                  console.error("Error while adding relative:", error);
                   Toastify({
-                    text: 'Error while adding relative',
+                    text: "Error while adding relative",
                     duration: 3000,
-                    position: 'center',
+                    position: "center",
                     style: {
-                      background: 'linear-gradient(180deg, #dd464c, #8d2729)',
+                      background: "linear-gradient(180deg, #dd464c, #8d2729)",
                     },
                   }).showToast();
                 }
                 return result.data;
               } catch (error) {
-                console.log('Error while adding relative:', error.message);
+                console.log("Error while adding relative:", error.message);
                 Toastify({
-                  text: 'Error while adding relative',
+                  text: "Error while adding relative",
                   duration: 3000,
-                  position: 'center',
+                  position: "center",
                   style: {
-                    background: 'red',
+                    background: "red",
                   },
                 }).showToast();
               } finally {
-                console.log('finally');
-                submitButton.removeAttribute('disabled');
-                submitButton.classList.remove('loading');
+                console.log("finally");
+                submitButton.removeAttribute("disabled");
+                submitButton.classList.remove("loading");
               }
             }
           });
@@ -338,11 +374,11 @@ async function start() {
         // console.log(apiRetrievedData[j], 'apiRetrievedData[j]');
       }
       chart.load(apiRetrievedData);
-      spinner.setAttribute('hidden', '');
+      spinner.setAttribute("hidden", "");
     }
   } catch (err) {
     console.log(err.message);
-    spinner.setAttribute('hidden', '');
+    spinner.setAttribute("hidden", "");
     throw new Error(`Error: ${err.message}`, { cause: err });
   }
 }
