@@ -98,9 +98,9 @@ button[data-edit-from-btn="submit"] {
 }
 .submit-btn {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
   width: 80%;
-  height: 30px;
+  height: 40px;
   left: 50px;
   padding: 9px 20px;
   border-radius: 5px;
@@ -171,7 +171,7 @@ text {
 }
 .bft-form-fieldset {
   position: absolute !important;
-  top: 30px !important;
+  top: 38px !important;
 }
 .bft-edit-form-close {
   left: 10px !important;
@@ -211,3 +211,7 @@ option[value=""] {
 .bft-input > label {
   font-size: 12px !important;
 }
+/* form[data-bft-edit-form] { */
+/* height: 100vh !important; */
+/* height: fit-content !important; */
+/* } */
